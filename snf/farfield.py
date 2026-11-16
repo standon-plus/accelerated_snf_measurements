@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.constants import mu_0, c
-from scipy.special import spherical_jn, spherical_yn
-from snf.swe import j_index, wigner_d_rows
+from snf.swe import j_index, wigner_d_rows, z3
 
 Z0 = mu_0 * c
 
@@ -36,6 +35,7 @@ def sw_functions(N, theta, phi, kr=None):
     '''
     Hansen spherical wave functions F^(3)_smn, or far-field functions K_smn if kr is None.
     Built from Hansen's Wigner d (mu = -1, 0, 1) so the convention matches swe.psi.
+    K_smn here is Hansen's K_smn, with an additional factor of 1/4pi for orthogonality.
 
     theta, phi (np.array): Dimensions (I)
     kr (np.array): wavenumber times radius. Dimensions (I)
@@ -49,12 +49,11 @@ def sw_functions(N, theta, phi, kr=None):
         A = -sn * (d[n-1][:, 0] + d[n-1][:, 2])  # (-m/|m|)^m m Pbar / sin(theta)
         B = sn * (d[n-1][:, 0] - d[n-1][:, 2])   # (-m/|m|)^m dPbar / dtheta
         P0 = np.sqrt((2 * n + 1) / 2) * d[n-1][:, 1] # (-m/|m|)^m Pbar
-        e = np.exp(1j * np.outer(phi, ms)) / np.sqrt(2 * np.pi * n * (n + 1))
+        e = np.exp(1j * np.outer(phi, ms)) / np.sqrt(2 * np.pi * n * (n + 1)) # add the additional 1/4pi here
         if kr is None:
             r1, r2, rr = (-1j)**(n + 1), (-1j)**n, 0
         else:
-            h = spherical_jn(n, kr) + 1j * spherical_yn(n, kr)
-            h_prev = spherical_jn(n - 1, kr) + 1j * spherical_yn(n - 1, kr)
+            h, h_prev = z3(n, kr), z3(n - 1, kr)
             r1, r2, rr = h[:, None], (h_prev - n * h / kr)[:, None], (n * (n + 1) * h / kr)[:, None]
         F1 = np.stack([np.zeros_like(A), 1j * A, -B], axis=-1) * (r1 * e)[..., None]
         F2 = np.stack([rr * P0, r2 * B, r2 * 1j * A], axis=-1) * e[..., None]

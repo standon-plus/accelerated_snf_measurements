@@ -58,7 +58,7 @@ def s21_reciprocity(xyz, Ea, Ha, Eb, Hb, P1=1.0, P2=1.0): # S21 = (1/(4 sqrt(P1 
     S_n = np.sum(np.cross(Ea, Hb) * n, axis=1) - np.sum(np.cross(Eb, Ha) * n, axis=1)
     integrand = S_n.reshape(n_th, n_ph) * np.sin(th_1d)[:, None]
 
-    # Integrate (R^2 dphi dtheta)
+    # Integrate (R^2 S_n sin(theta) dphi dtheta)
     inner = np.trapezoid(integrand, ph_1d, axis=1)
     w = R**2 * np.trapezoid(inner, th_1d)
 

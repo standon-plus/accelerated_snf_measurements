@@ -1,5 +1,13 @@
 import numpy as np
 
+def full_sampling(N, oversample=1.0): # Equiangular grid, fully sampled with enough points up to N
+    n_theta = int(np.ceil(oversample * (N + 1)))
+    n_phi = int(np.ceil(oversample * (2 * N + 1)))
+    theta = (np.arange(n_theta) + 0.5) * np.pi / n_theta
+    phi = np.linspace(0, 2 * np.pi, n_phi, endpoint=False)
+    theta, phi = np.meshgrid(theta, phi)
+    return theta.flatten(), phi.flatten()
+
 def equiangular_bernoulli(num_points, dth=np.radians(9), n_phi=25): # Equiangular grid, randomly subsampled
     theta = np.arange(dth / 2, np.pi, dth)
     phi = np.linspace(0, 2 * np.pi, n_phi, endpoint=False)
