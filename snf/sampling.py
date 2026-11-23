@@ -8,13 +8,15 @@ def full_sampling(N, oversample=1.0): # Equiangular grid, fully sampled with eno
     theta, phi = np.meshgrid(theta, phi)
     return theta.flatten(), phi.flatten()
 
-def equiangular_bernoulli(num_points, dth=np.radians(9), n_phi=25): # Equiangular grid, randomly subsampled
-    theta = np.arange(dth / 2, np.pi, dth)
-    phi = np.linspace(0, 2 * np.pi, n_phi, endpoint=False)
-    theta, phi = np.meshgrid(theta, phi)
-    theta, phi = theta.flatten(), phi.flatten()
-    idx = np.random.choice(len(theta), size=num_points)
-    return theta[idx], phi[idx]
+def equiangular_bernoulli(num_points, N, oversample=1.0): # Randomly subsample positions of full_sampling(N) without replacement. idx indexes the full grid
+    theta, phi = full_sampling(N, oversample)
+    idx = np.sort(np.random.choice(len(theta), size=num_points, replace=False))
+    return theta[idx], phi[idx], idx
+
+def uniform_random(num_points): # Positions drawn uniformly on the sphere
+    theta = np.arccos(1 - 2 * np.random.rand(num_points))
+    phi = np.random.rand(num_points) * 2 * np.pi
+    return theta, phi
 
 def spiral_random_phi(num_points): # Constant-ish theta spacing with random phi
     theta = np.arccos((2 * np.arange(num_points) - num_points + 1) / (num_points - 1))
